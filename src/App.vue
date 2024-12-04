@@ -32,7 +32,7 @@
           </div>
 
           <!-- Grid of subfolders -->
-          <div v-if="!isLoading" class="grid grid-cols-10 mt-6 gap-10">
+          <div v-if="!isLoading" class="grid sm:grid-cols-10 grid-cols-2 mt-6 gap-10">
             <!-- Subfolders in selected folder -->
             <div v-for="subfolder in selectedFolder.subfolders" :key="subfolder.id"
               class="rounded hover:bg-gray-200 hover:rounded-lg cursor-pointer"
