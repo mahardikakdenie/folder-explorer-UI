@@ -13,7 +13,38 @@ export const folders = [
 		icon: 'fa fa-folder',
 		isOpen: false,
 		children: [
-			{ name: 'Projects', icon: 'fa fa-briefcase' },
+            {
+                name: 'Projects',
+				icon: 'fa fa-briefcase',
+                isOpen: false,
+				children: [
+					{
+						name: 'Warung Mie',
+                        icon: 'fa fa-folder',
+		                isOpen: false,
+                        children: [
+                            {
+                                name: 'Warung Mie',
+                                icon: 'fa fa-folder',
+                                isOpen: false,
+                                children: [],
+                            }
+                        ],
+					},
+					{
+						name: 'Warung Mie',
+                        icon: 'fa fa-folder',
+		                isOpen: false,
+                        children: [],
+					},
+					{
+						name: 'Warung Mie',
+                        icon: 'fa fa-folder',
+		                isOpen: false,
+                        children: [],
+					},
+				],
+			},
 			{ name: 'Reports', icon: 'fa fa-flag' },
 		],
 	},
@@ -73,4 +104,4 @@ export const folders = [
 			{ name: 'Family', icon: 'fa fa-users' },
 		],
 	},
-]
+];

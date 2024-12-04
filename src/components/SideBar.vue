@@ -15,10 +15,10 @@
                         <small>Folders</small>
                     </div>
                 </li>
-                <li v-for="(item, index) in menuItems" :key="index" class="flex flex-col relative">
+                <li v-for="(item, index) in folders" :key="index" class="flex flex-col relative">
                     <!-- Parent Menu Item -->
                     <div class="flex items-center space-x-3 cursor-pointer rounded-lg p-2 hover:bg-slate-700 relative"
-                        @click="toggleChildMenu(index)">
+                        @click="$emit('toggle', index)">
                         <i :class="item.icon" class="text-[17px]"></i>
                         <div class="text-[10px] font-medium">
                             {{ item.name }}
@@ -35,6 +35,7 @@
                         <li v-for="(child, childIndex) in item.children" :key="childIndex">
                             <!-- Horizontal Connector Line -->
                             <div
+                                @click="$emit('selected', item, child)"
                                 class="flex items-center space-x-3 cursor-pointer rounded-lg p-2 hover:bg-slate-600 relative">
                                 <span
                                     class="absolute left-0 top-1/2 transform -translate-y-1/2 w-3 border-t border-slate-600"></span>
@@ -59,12 +60,24 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue';
-import { folders } from "../libs/static.ts";
+// Define folder and child types
+interface Child {
+    name: string;
+    icon: string;
+}
 
-const menuItems = reactive(folders);
+interface Folder {
+    name: string;
+    icon: string;
+    isOpen: boolean;
+    children: Child[];
+}
 
-const toggleChildMenu = (index: number) => {
-    menuItems[index].isOpen = !menuItems[index].isOpen;
-};
+// Define the 'folders' prop with the correct type
+defineProps({
+    folders: {
+        type: Array as () => Folder[], // Define folders as an array of Folder objects
+        default: () => [],
+    }
+});
 </script>
