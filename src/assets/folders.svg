@@ -1,0 +1,3 @@
+
+      <button @click="onMenuOptionClick('delete')">Delete</button>
+      <button @click="onMenuOptionClick('rename')">Rename</button>
