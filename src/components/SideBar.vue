@@ -67,19 +67,19 @@ import LoadingSection from './Loading.vue';
 // import { watch } from 'vue';
 // Define folder and child types
 interface Child {
-    id: number,
-    name: string;
-    icon: string;
-    isOpen: boolean;
-    children: Child[];
+    id?: number,
+    name?: string;
+    icon?: string;
+    isOpen?: boolean;
+    children?: Child[];
 }
 
 interface Folder {
-    id: number,
-    name: string;
-    icon: string;
-    isOpen: boolean;
-    children: Child[];
+    id?: number,
+    name?: string;
+    icon?: string;
+    isOpen?: boolean;
+    children?: Child[];
 }
 
 // Define the 'folders' prop with the correct type

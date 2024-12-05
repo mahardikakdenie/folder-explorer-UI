@@ -25,7 +25,8 @@
 						<small
 							v-for="(history, index) in folderHistory"
 							:key="index"
-							class="hover:text-blue-600 hover:underline cursor-pointer transition duration-300 ease-in-out">
+							class="hover:text-blue-600 hover:underline cursor-pointer transition duration-300 ease-in-out"
+            >
 							{{ history }}
 							<!-- Gunakan ikon Font Awesome sebagai pemisah -->
 							<small
@@ -170,7 +171,6 @@ const setToggle = (index: number) => {
 };
 
 const setSelectedFolder = (folder: any, subfolder: any) => {
-	console.log('🚀 ~ setSelectedFolder ~ folder:', folder);
 	parentFolder.value = folder?.name;
 	selectedFolder.value = subfolder;
 	subFolder.value = subfolder.name;
