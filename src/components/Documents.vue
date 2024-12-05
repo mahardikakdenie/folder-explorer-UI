@@ -2,6 +2,7 @@
 	<div v-if="!isLoading" class="grid sm:grid-cols-2 grid-cols-1 mt-6 gap-10">
 		<!-- Subfolders in selected folder -->
 		<div
+			v-if="selectedFolder.children"
 			class="grid grid-cols-2 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-4 gap-5 max-h-[680px] overflow-y-auto">
 			<div
 				v-for="(subfolder, index) in selectedFolder.children"
@@ -25,7 +26,6 @@
 				</div>
 			</div>
 		</div>
-
 		<!-- Default folder view for larger screens or empty state -->
 		<div class="hidden sm:inline-block text-center">
 			<div class="w-48 mx-auto mb-4">

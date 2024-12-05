@@ -26,17 +26,15 @@
 						</small>
 					</div>
 				</div>
-				<div class="flex space-x-1 p-2">
-					<!-- Grid View Button -->
-					<button v-for="(icon, index) in [
-						'fa-th-large',
-						'fa-th-list',
-						'fa-list',
-					]" :key="index"
-						class="flex flex-col justify-center items-center p-3 rounded-lg bg-white hover:bg-blue-100 transition-all duration-300 transform hover:scale-105 border-2 border-gray-200">
-						<i :class="'fa ' + icon + ' text-2xl'"></i>
-					</button>
-				</div>
+				<!-- Folder Creation Button -->
+			<div v-if="!isLoading">
+				<button
+					class="border border-slate-600 rounded-lg w-full p-1 text-sm hover:bg-slate-700"
+					@click="onMenuOptionClick('create')"
+				>
+					<small>Buat Folder</small>
+				</button>
+			</div>
 			</div>
 
 			<hr />
@@ -77,7 +75,7 @@
 		<CreateModal v-if="isModalCreateVisible" :hide-icon="history.length >= 0" :selected="selectedItem"
 			@close="isModalCreateVisible = false" @submit="createFolder" @update="updateFolder" />
 
-		<ConfirmModal v-if="isConfirmModalVisible && selectedItem" :selected="selectedItem"
+		<ConfirmModal v-if="isConfirmModalVisible" :selected="selectedItem"
 			@close="isConfirmModalVisible = false" @submit="deleteData" />
 	</div>
 </template>
@@ -228,11 +226,12 @@ const deleteData = (selected: any) => {
 			const index = generalFolder.value?.children?.findIndex(
 				(curr) => curr?.id === data?.id
 			);
+			if ((index && index !== -1) || index === 0) {
 
-			if (index && index !== -1) {
-				if (generalFolder.value?.children) {
-					generalFolder.value.children.splice(index, 1)
+				if (generalFolder.value?.children?.length === 1) {
+					generalFolder.value.children = []
 				}
+				generalFolder.value?.children?.splice(index, 1)
 			}
 		} else {
 			if (selectedFolder.value) {
@@ -240,7 +239,7 @@ const deleteData = (selected: any) => {
 					(curr) => curr?.id === data?.id
 				);
 
-				if (index && index !== -1) {
+				if ((index && index !== -1) || index === 0) {
 					if (selectedFolder.value.children) {
 						selectedFolder.value.children.splice(index, 1)
 					}
@@ -249,11 +248,12 @@ const deleteData = (selected: any) => {
 		}
 
 		isConfirmModalVisible.value = false;
+		selectedFolder.value = null;
 	};
 
 	const err = (e: any) => console.log(e);
 
-	deleteFolderData(selected.id, callback, err);
+	deleteFolderData(selected?.id, callback, err);
 }
 
 const createFolder = (params: any, type: string) => {
@@ -279,7 +279,7 @@ const createFolder = (params: any, type: string) => {
 			}
 		}
 
-		selectedItem.value = null;
+		selectedFolder.value = null;
 	};
 
 	const err = (e: any) => console.log(e);
@@ -308,7 +308,7 @@ const updateFolder = (params: any) => {
 				(curr) => curr?.id === params?.id
 			);
 
-			if (index && index !== -1) {
+			if ((index && index !== -1) || index === 0) {
 				if (generalFolder.value?.children) {
 					generalFolder.value.children[index].name = params?.name;
 				}
@@ -319,7 +319,7 @@ const updateFolder = (params: any) => {
 					(curr) => curr?.id === params?.id
 				);
 
-				if (index && index !== -1) {
+				if ((index && index !== -1) || index === 0) {
 					if (selectedFolder.value.children) {
 						selectedFolder.value.children[index].name =
 							params?.name;
