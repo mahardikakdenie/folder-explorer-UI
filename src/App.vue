@@ -73,7 +73,7 @@
 			:context-menu-docs="contextMenuDocs" @on-click="onMenuOptionClick" />
 
 		<CreateModal v-if="isModalCreateVisible" :hide-icon="history.length >= 0" :selected="selectedItem"
-			@close="isModalCreateVisible = false" @submit="createFolder" @update="updateFolder" />
+			@close="isModalCreateVisible = false" :type="modalType" @submit="createFolder" @update="updateFolder" />
 
 		<ConfirmModal v-if="isConfirmModalVisible" :selected="selectedItem"
 			@close="isConfirmModalVisible = false" @submit="deleteData" />
@@ -285,7 +285,7 @@ const createFolder = (params: any, type: string) => {
 			}
 		}
 
-		selectedFolder.value = null;
+		// selectedFolder.value = null;
 	};
 
 	const err = (e: any) => console.log(e);
@@ -353,10 +353,13 @@ const closeContextMenu = () => {
 	contextDocsMenu.value = false;
 };
 
+const modalType = ref<string>('create');
 const onMenuOptionClick = (key: string) => {
 	if (key === 'create') {
+		modalType.value = 'create';
 		isModalCreateVisible.value = true;
 	} else if (key === 'rename') {
+		modalType.value = 'rename';
 		isModalCreateVisible.value = true;
 	} else {
 		isConfirmModalVisible.value = true;

@@ -1,5 +1,5 @@
 <template>
-	<modal :title="modalTitle">
+	<modal :title="modalTitle" @close="$emit('close')">
 		<template #body>
 			<div class="p-3 space-y-2">
 				<div class="">
@@ -66,6 +66,10 @@ const props = defineProps({
 			children: [], // Initialize with empty children array
 		}),
 	},
+    type: {
+        type: String,
+        default: 'create',
+    }
 });
 
 const name = ref<string>('');
@@ -125,11 +129,8 @@ const onSelectIcon = (icon: string) => {
     selectedIcon.value = icon
 }
 
-const isEdit = computed(() => {
-	return props.selected && props.selected.name && props.selected.name !== '';
-});
 
-const modalTitle = computed(() => isEdit.value ? 'Edit Folder' : 'Buat Folder');
+const modalTitle = computed(() => props.type === 'rename' ? 'Edit Folder' : 'Buat Folder');
 const emits = defineEmits(['submit', 'update', 'close']);
 const submit = () => {
     const params ={
@@ -138,7 +139,7 @@ const submit = () => {
         icon: selectedIcon?.value || 'fa fa-folder',
     }
     
-    if (isEdit.value) {
+    if (props.type === 'rename') {
         emits('update', params);
     } else {
         emits('submit', params);
@@ -146,7 +147,7 @@ const submit = () => {
 };
 
 onMounted(() => {
-    if (props.selected) {
+    if (props.selected && props.type === 'rename') {
         name.value = props.selected.name ?? '';
     }
 });
