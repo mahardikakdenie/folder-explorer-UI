@@ -107,6 +107,8 @@
 			:context-menu-x="contextMenuX"
 			:context-menu-docs="contextMenuDocs"
 			@on-click="onMenuOptionClick" />
+
+    <CreateModal v-if="isModalCreateVisible" @close="isModalCreateVisible = false" />
 	</div>
 </template>
 
@@ -114,6 +116,7 @@
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import Sidebar from './components/SideBar.vue';
 import LoadingSection from './components/Loading.vue';
+import CreateModal from './components/Modal.vue';
 import ActionModal from './components/ActionModal.vue';
 import { folders } from './libs/static';
 import Documents, { Subfolder } from './components/Documents.vue';
@@ -142,6 +145,7 @@ const parentFolder = ref('');
 const isLoading = ref(false);
 const isFetching = ref<boolean>(false);
 const history = ref<any>([]);
+const isModalCreateVisible = ref<boolean>(false);
 // Methods
 const setToggle = (index: number) => {
 	menus.value[index].isOpen = !menus.value[index].isOpen;
@@ -250,6 +254,9 @@ const closeContextMenu = () => {
 
 const onMenuOptionClick = (key: string) => {
 	console.log(key);
+  if (key === 'create') {
+    isModalCreateVisible.value = true;
+  }
 };
 
 const getDataFolders = () => {
