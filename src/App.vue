@@ -3,22 +3,41 @@
 		<!-- Sidebar -->
 		<Sidebar
 			:folders="menus"
-			@selected="loadFolderContent"
+			:is-loading="isFetching"
+			:history="history"
+			@selected="setSelectedFolder"
 			@toggle="setToggle" />
 
 		<!-- Main Content -->
 		<div class="w-full flex flex-col">
 			<!-- Header / Toolbar -->
-			<div class="bg-gray-100 p-4 shadow-md flex items-center space-x-4">
-				<button
-					@click="goBack"
-					class="px-4 py-2 rounded bg-blue-500 text-white">
-					Back
-				</button>
-				<div class="flex-1">
-					<small>{{ folderHistory }}</small>
+			<div
+				class="bg-gray-100 p-4 shadow-md flex items-center space-x-4 justify-between">
+				<div class="flex gap-2">
+					<button
+						@click="goBack"
+						class="px-2 border border-blue-500 rounded-md">
+						<i
+							class="fa fa-chevron-left text-blue-500"
+							aria-hidden="true"></i>
+					</button>
+					<div class="flex items-center space-x-2">
+						<small
+							v-for="(history, index) in folderHistory"
+							:key="index"
+							class="hover:text-blue-600 hover:underline cursor-pointer transition duration-300 ease-in-out">
+							{{ history }}
+							<!-- Gunakan ikon Font Awesome sebagai pemisah -->
+							<small
+								v-if="index !== folderHistory.length - 1"
+								class="mx-2 text-gray-500">
+								<i class="fa fa-arrow-right"></i>
+								<!-- Ikon panah kanan -->
+							</small>
+						</small>
+					</div>
 				</div>
-				<div class="flex space-x-3 p-2">
+				<div class="flex space-x-1 p-2">
 					<!-- Grid View Button -->
 					<button
 						v-for="(icon, index) in [
@@ -57,12 +76,15 @@
 
 					<!-- Grid of subfolders -->
 					<Documents
-						v-if="!isLoading && selectedFolder.children && selectedFolder.children.length > 0"
+						v-if="
+							!isLoading &&
+							selectedFolder.children &&
+							selectedFolder.children.length > 0
+						"
 						:isLoading="isLoading"
 						:selected-folder="selectedFolder"
 						@handle-right-click="handleDocRightClck"
-            @on-double-click="ondblclick"
-          />
+						@on-double-click="ondblclick" />
 					<LoadingSection v-else />
 				</div>
 				<div v-else>
@@ -106,17 +128,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onBeforeUnmount, computed } from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import Sidebar from './components/SideBar.vue';
 import LoadingSection from './components/Loading.vue';
 import { folders } from './libs/static';
 import Documents, { Subfolder } from './components/Documents.vue';
+import { getData, getDataSub } from './libs/api/folders';
 
-const menus = reactive(folders);
-
-const setToggle = (index: number) => {
-	menus[index].isOpen = !menus[index].isOpen;
-};
+const menus = ref(folders);
 
 const contextMenuOptions = ref([
 	{ label: 'Open', action: 'open', icon: 'fa fa-folder-open' },
@@ -136,26 +155,53 @@ const contextMenuY = ref(0);
 const selectedItem = ref<any>(null);
 const subFolder = ref('');
 const parentFolder = ref('');
-// const currentFolder = computed(() => {
-// 	return `${parentFolder.value} - ${subFolder.value}`;
-// });
-
+const isLoading = ref(false);
+const isFetching = ref<boolean>(false);
+const history = ref<any>([]);
 // Methods
-const history = ref<string[]>([]);
-const loadFolderContent = (folder: any, subfolder: any) => {
+const setToggle = (index: number) => {
+	menus.value[index].isOpen = !menus.value[index].isOpen;
+	selectedFolder.value = menus.value[index];
+
+	if (history.value.length > 0) {
+		history.value = [];
+	}
+	history.value.push(menus.value[index]);
+};
+
+const setSelectedFolder = (folder: any, subfolder: any) => {
+	console.log('🚀 ~ setSelectedFolder ~ folder:', folder);
 	parentFolder.value = folder?.name;
 	selectedFolder.value = subfolder;
 	subFolder.value = subfolder.name;
 
-  if (history.value.length > 0) {
-    history.value = [];
-  }
-  history.value.push(folder.name);
+	const index = history.value.findIndex(
+		(curr: any) => curr?.id === subfolder?.id
+	);
+	if (history.value.length > 0) {
+		// Cek apakah id pertama di history berbeda dengan folder id yang sedang diproses
+		if (history.value[0].id !== folder?.id && index === -1) {
+			history.value = []; // Reset history jika id pertama berbeda
+		} else if (history.value[0].id === folder?.id && index === -1) {
+			// Jika id pertama sama, tambahkan subfolder ke history
+			history.value.push(subfolder);
+		} else {
+			if (index !== -1) {
+				// Jika ditemukan, hapus elemen setelah index pertama yang ditemukan
+				history.value = history.value.slice(0, index + 1);
+			}
+		}
+	} else {
+		// Jika history kosong, tambahkan folder pertama
+		history.value.push(folder);
+	}
+
+	console.log('halo');
 };
 
 const folderHistory = computed(() => {
-  return history.value?.join(' - ') ?? '';
-})
+	return history.value?.map((curr: any) => curr?.name);
+});
 
 const goBack = () => {
 	console.log('Go Back');
@@ -179,30 +225,47 @@ const handleDocRightClck = (event: MouseEvent, subfolder?: Subfolder) => {
 	contextDocsMenu.value = true;
 	selectedItem.value = subfolder;
 	if (selectedItem.value) {
-    contextMenuDocs.value = [
-		{ label: 'Open', action: 'open', icon: 'fa fa-folder-open' },
-		{ label: 'Delete', action: 'delete', icon: 'fa fa-trash' },
-		{ label: 'Rename', action: 'rename', icon: 'fa fa-edit' },
-		{ label: 'Info', action: 'Info', icon: 'fa fa-info-circle' },
-	];
-  } else {
-    contextMenuDocs.value = [
-		{ label: 'Buat Folder', action: 'create', icon: 'fa fa-folder-open-o' },
-	];
-  }
+		contextMenuDocs.value = [
+			{ label: 'Open', action: 'open', icon: 'fa fa-folder-open' },
+			{ label: 'Delete', action: 'delete', icon: 'fa fa-trash' },
+			{ label: 'Rename', action: 'rename', icon: 'fa fa-edit' },
+			{ label: 'Info', action: 'Info', icon: 'fa fa-info-circle' },
+		];
+	} else {
+		contextMenuDocs.value = [
+			{
+				label: 'Buat Folder',
+				action: 'create',
+				icon: 'fa fa-folder-open-o',
+			},
+		];
+	}
 
-  console.log('contextMenuOptions :', contextMenuOptions.value);
-  
+	console.log('contextMenuOptions :', contextMenuOptions.value);
+};
+
+const getSubDocs = (documentId: number) => {
+	isLoading.value = true;
+	const callback = (res: any) => {
+		const data = res?.data;
+		isLoading.value = false;
+		selectedFolder.value = data;
+	};
+
+	const err = (e: any) => console.log(e);
+
+	getDataSub(documentId, { entities: 'children.children' }, callback, err);
 };
 
 const ondblclick = (subfolder: Subfolder) => {
-  selectedFolder.value = subfolder;
-  history.value.push(subfolder.name || '');
+	console.log('curr : ', subfolder);
+	getSubDocs(subfolder.id ?? 0);
+	history.value.push(subfolder || '');
 };
 
 const closeContextMenu = () => {
 	contextMenuVisible.value = false;
-  contextDocsMenu.value = false;
+	contextDocsMenu.value = false;
 };
 
 const onMenuOptionClick = (action: string) => {
@@ -210,14 +273,25 @@ const onMenuOptionClick = (action: string) => {
 	contextMenuVisible.value = false;
 };
 
-// Lifecycle Hooks
-const isLoading = ref(true);
-onMounted(() => {
-	window.addEventListener('click', closeContextMenu);
-
-	setTimeout(() => {
+const getDataFolders = () => {
+	isFetching.value = true;
+	isLoading.value = true;
+	const callback = (res: any) => {
+		console.log(res.data);
+		menus.value = res?.data;
+		isFetching.value = false;
 		isLoading.value = false;
-	}, 3000);
+	};
+
+	const err = (e: any) => console.log(e);
+
+	getData({ entities: 'children.children' }, callback, err);
+};
+
+// Lifecycle Hooks
+onMounted(() => {
+	getDataFolders();
+	window.addEventListener('click', closeContextMenu);
 });
 
 onBeforeUnmount(() => {

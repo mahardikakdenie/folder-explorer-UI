@@ -33,20 +33,17 @@
 					src="https://i.ibb.co/87DRwhQ/folder.png"
 					alt="default folder" />
 			</div>
-			<p class="text-gray-500">No folders to display</p>
+			<p v-if="!selectFolder" class="text-gray-500">No folders to display</p>
 
-			<div class="mt-10 text-start">
+			<div v-else class="mt-10 text-start">
 				<div>
-					<span class="text-md font-bold">Document List</span>
+					<span class="text-md font-bold">{{ selectFolder.name }}</span>
 				</div>
 				<div>
 					<p class="text-sm text-gray-400">
 						This folder is currently empty. Upload your files to get
 						started.
 					</p>
-				</div>
-				<div class="mt-4">
-					<span class="font-semibold">Folder (292MB)</span>
 				</div>
 				<div class="mt-4 text-sm text-gray-500">
 					<p>
@@ -58,6 +55,7 @@
 				<div class="mt-6">
 					<!-- Optional: Add a button to upload or create a folder -->
 					<button
+                        @click="onDoubleClick(selectFolder)"
 						class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-300">
 						Masuk Documents
 					</button>
@@ -68,8 +66,10 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 // Define the structure of each subfolder item
 export interface Subfolder {
+    id?: number
 	name?: string;
 	icon?: string;
 	children?: Subfolder[]; // Optional: Only if folders can have nested folders
@@ -77,7 +77,9 @@ export interface Subfolder {
 
 // Define the structure of the selected folder (which contains an array of subfolders)
 export interface Folder {
+    id?: number
 	name?: string;
+	icon?: string;
 	children?: Subfolder[];
 }
 
@@ -96,6 +98,8 @@ defineProps({
 	},
 });
 
+const selectFolder = ref<Folder | null>(null);
+
 // Methods
 const emits = defineEmits([
 	'handle-right-click',
@@ -105,6 +109,7 @@ const emits = defineEmits([
 
 const selectItem = (subfolder: Subfolder) => {
 	emits('select-item', subfolder);
+    selectFolder.value = subfolder;
 };
 
 const handleRightClick = (event: MouseEvent, subfolder: Subfolder) => {
