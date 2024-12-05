@@ -154,8 +154,6 @@ const setToggle = (index: number) => {
 };
 
 const setSelectedFolder = (folder: any, subfolder: any) => {
-	console.log("🚀 ~ setSelectedFolder ~ subfolder:", subfolder)
-	console.log("🚀 ~ setSelectedFolder ~ folder:", folder)
 	parentFolder.value = folder?.name;
 	selectedFolder.value = subfolder;
 	subFolder.value = subfolder.name;
@@ -180,8 +178,6 @@ const setSelectedFolder = (folder: any, subfolder: any) => {
 		// Jika history kosong, tambahkan folder pertama
 		history.value.push(folder);
 	}
-
-	console.log('halo');
 };
 
 const folderHistory = computed(() => {
@@ -192,7 +188,6 @@ const goBack = (history: any) => {
   if (history) {
     setSelectedFolder(history, history);
   }
-	console.log('Go Back');
 };
 
 const handleRightClick = (event: MouseEvent) => {
