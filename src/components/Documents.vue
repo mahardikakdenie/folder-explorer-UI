@@ -72,6 +72,7 @@ export interface Subfolder {
     id?: number
 	name?: string;
 	icon?: string;
+	isOpen?: boolean,
 	children?: Subfolder[]; // Optional: Only if folders can have nested folders
 }
 

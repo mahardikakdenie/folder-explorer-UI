@@ -1,7 +1,7 @@
 <template>
 	<div class="flex h-screen">
 		<!-- Sidebar -->
-		<Sidebar :folders.sync="menus" :is-loading="isFetching" :history="history" @selected="setSelectedFolder"
+		<Sidebar :folders="menus" :is-loading="isFetching" :history="history" @selected="setSelectedFolder"
 			@toggle="setToggle" @create-folder="createFolder" @open-modal-create="onMenuOptionClick('create')" />
 
 		<!-- Main Content -->
@@ -27,14 +27,12 @@
 					</div>
 				</div>
 				<!-- Folder Creation Button -->
-			<div v-if="!isLoading">
-				<button
-					class="border border-slate-600 rounded-lg w-full p-1 text-sm hover:bg-slate-700"
-					@click="onMenuOptionClick('create')"
-				>
-					<small>Buat Folder</small>
-				</button>
-			</div>
+				<div v-if="!isLoading">
+					<button class="border border-slate-600 rounded-lg w-full p-1 text-sm hover:bg-slate-700"
+						@click="onMenuOptionClick('create')">
+						<small>Buat Folder</small>
+					</button>
+				</div>
 			</div>
 
 			<hr />
@@ -75,8 +73,8 @@
 		<CreateModal v-if="isModalCreateVisible" :hide-icon="history.length >= 0" :selected="selectedItem"
 			@close="isModalCreateVisible = false" :type="modalType" @submit="createFolder" @update="updateFolder" />
 
-		<ConfirmModal v-if="isConfirmModalVisible" :selected="selectedItem"
-			@close="isConfirmModalVisible = false" @submit="deleteData" />
+		<ConfirmModal v-if="isConfirmModalVisible" :selected="selectedItem" @close="isConfirmModalVisible = false"
+			@submit="deleteData" />
 	</div>
 </template>
 
@@ -234,7 +232,7 @@ const deleteData = (selected: any) => {
 				generalFolder.value?.children?.splice(index, 1)
 			}
 
-			const indexMenus = menus.value.findIndex((curr:any) => curr?.id === data.id);
+			const indexMenus = menus.value.findIndex((curr: any) => curr?.id === data.id);
 
 			if ((indexMenus && indexMenus !== -1) || indexMenus === 0) {
 				menus.value.splice(indexMenus, 1);
@@ -272,17 +270,28 @@ const createFolder = (params: any, type: string) => {
 			isModalCreateVisible.value = false;
 
 			if (history.value.length === 0) {
-
 				if (generalFolder.value?.children) {
 					generalFolder.value.children.push(data);
 				}
 			} else {
 				if (selectedFolder.value) {
+					console.log('halo');
+
 					if (selectedFolder.value.children) {
 						selectedFolder.value.children.push(data);
+						if (selectedFolder?.value?.isOpen === undefined) {
+							const indexParent = menus.value.findIndex((curr: any) => curr?.id === data?.parent_id);
+
+							if ((indexParent && indexParent !== -1) || indexParent === 0) {
+								console.log(menus.value[indexParent]);
+								menus.value[indexParent].children.push(data);
+							}
+						}
+						console.log("🚀 ~ callback ~ selectedFolder.value:", selectedFolder.value)
 					}
 				}
 			}
+
 		}
 
 		// selectedFolder.value = null;
