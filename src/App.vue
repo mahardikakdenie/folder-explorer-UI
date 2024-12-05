@@ -15,7 +15,7 @@
 				class="bg-gray-100 p-4 shadow-md flex items-center space-x-4 justify-between">
 				<div class="flex gap-2">
 					<button
-						@click="goBack"
+						@click="goBack(folderHistory[folderHistory.length - 2])"
 						class="px-2 border border-blue-500 rounded-md">
 						<i
 							class="fa fa-chevron-left text-blue-500"
@@ -26,8 +26,8 @@
 							v-for="(history, index) in folderHistory"
 							:key="index"
 							class="hover:text-blue-600 hover:underline cursor-pointer transition duration-300 ease-in-out"
-            >
-							{{ history }}
+							@click="setSelectedFolder(history, history)">
+							{{ history.name }}
 							<!-- Gunakan ikon Font Awesome sebagai pemisah -->
 							<small
 								v-if="index !== folderHistory.length - 1"
@@ -95,36 +95,18 @@
 				</div>
 			</div>
 		</div>
-		<div
+		<ActionModal
 			v-if="contextMenuVisible"
-			:style="{ top: `${contextMenuY}px`, left: `${contextMenuX}px` }"
-			class="absolute bg-white border border-gray-300 rounded-md shadow-lg p-2 z-50 w-48">
-			<ul class="space-y-1 text-sm">
-				<li v-for="(option, index) in contextMenuOptions" :key="index">
-					<button
-						@click="onMenuOptionClick(option.action)"
-						class="w-full flex items-center space-x-2 p-2 rounded-md hover:bg-blue-100 text-gray-700 hover:text-blue-600 transition-all duration-150">
-						<i :class="option.icon" class="text-lg"></i>
-						<span>{{ option.label }}</span>
-					</button>
-				</li>
-			</ul>
-		</div>
-		<div
+			:context-menu-y="contextMenuY"
+			:context-menu-x="contextMenuX"
+			:context-menu-docs="contextMenuOptions"
+			@on-click="onMenuOptionClick" />
+		<ActionModal
 			v-if="contextDocsMenu"
-			:style="{ top: `${contextMenuY}px`, left: `${contextMenuX}px` }"
-			class="absolute bg-white border border-gray-300 rounded-md shadow-lg p-2 z-50 w-48">
-			<ul class="space-y-1 text-sm">
-				<li v-for="(option, index) in contextMenuDocs" :key="index">
-					<button
-						@click="onMenuOptionClick(option.action)"
-						class="w-full flex items-center space-x-2 p-2 rounded-md hover:bg-blue-100 text-gray-700 hover:text-blue-600 transition-all duration-150">
-						<i :class="option.icon" class="text-lg"></i>
-						<span>{{ option.label }}</span>
-					</button>
-				</li>
-			</ul>
-		</div>
+			:context-menu-y="contextMenuY"
+			:context-menu-x="contextMenuX"
+			:context-menu-docs="contextMenuDocs"
+			@on-click="onMenuOptionClick" />
 	</div>
 </template>
 
@@ -132,6 +114,7 @@
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import Sidebar from './components/SideBar.vue';
 import LoadingSection from './components/Loading.vue';
+import ActionModal from './components/ActionModal.vue';
 import { folders } from './libs/static';
 import Documents, { Subfolder } from './components/Documents.vue';
 import { getData, getDataSub } from './libs/api/folders';
@@ -171,6 +154,8 @@ const setToggle = (index: number) => {
 };
 
 const setSelectedFolder = (folder: any, subfolder: any) => {
+	console.log("🚀 ~ setSelectedFolder ~ subfolder:", subfolder)
+	console.log("🚀 ~ setSelectedFolder ~ folder:", folder)
 	parentFolder.value = folder?.name;
 	selectedFolder.value = subfolder;
 	subFolder.value = subfolder.name;
@@ -200,10 +185,13 @@ const setSelectedFolder = (folder: any, subfolder: any) => {
 };
 
 const folderHistory = computed(() => {
-	return history.value?.map((curr: any) => curr?.name);
+	return history.value;
 });
 
-const goBack = () => {
+const goBack = (history: any) => {
+  if (history) {
+    setSelectedFolder(history, history);
+  }
 	console.log('Go Back');
 };
 
@@ -240,8 +228,6 @@ const handleDocRightClck = (event: MouseEvent, subfolder?: Subfolder) => {
 			},
 		];
 	}
-
-	console.log('contextMenuOptions :', contextMenuOptions.value);
 };
 
 const getSubDocs = (documentId: number) => {
@@ -258,7 +244,6 @@ const getSubDocs = (documentId: number) => {
 };
 
 const ondblclick = (subfolder: Subfolder) => {
-	console.log('curr : ', subfolder);
 	getSubDocs(subfolder.id ?? 0);
 	history.value.push(subfolder || '');
 };
@@ -268,16 +253,14 @@ const closeContextMenu = () => {
 	contextDocsMenu.value = false;
 };
 
-const onMenuOptionClick = (action: string) => {
-	console.log(`${action} action on ${selectedItem}`);
-	contextMenuVisible.value = false;
+const onMenuOptionClick = (key: string) => {
+	console.log(key);
 };
 
 const getDataFolders = () => {
 	isFetching.value = true;
 	isLoading.value = true;
 	const callback = (res: any) => {
-		console.log(res.data);
 		menus.value = res?.data;
 		isFetching.value = false;
 		isLoading.value = false;
