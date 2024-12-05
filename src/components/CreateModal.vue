@@ -34,7 +34,9 @@
 		<template #footer>
 			<div class="px-4 gap-2 flex">
 				<button
-					class="text-sm border rounded-md px-4 border-neutral-200 text-neutral-800 py-1">
+					class="text-sm border rounded-md px-4 border-neutral-200 text-neutral-800 py-1"
+                    @click="$emit('close')"
+                >
 					Cancel
 				</button>
 				<button
@@ -48,14 +50,22 @@
 </template>
 
 <script setup lang="ts">
+import { Folder } from './Documents.vue';
 import Modal from './Modal.vue';
-import { ref } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 
-defineProps({
+const props = defineProps({
     hideIcon: {
         type: Boolean,
         default: false,
-    }
+    },
+    selected: {
+		type: Object as () => Folder, // Use the Folder interface
+		default: () => ({
+			name: '',
+			children: [], // Initialize with empty children array
+		}),
+	},
 });
 
 const name = ref<string>('');
@@ -110,12 +120,29 @@ const icons = ref<string[]>([
 	'fa fa-star',
 	'fa fa-flag',
 ]);
-const emits = defineEmits(['submit']);
+
+
+const isEdit = computed(() => {
+	return props.selected !== null;
+})
+const emits = defineEmits(['submit', 'update', 'close']);
 const submit = () => {
     const params ={
+        id: props.selected.id,
         name: name.value,
         icon: selectedIcon?.value,
     }
-	emits('submit', params);
+    if (isEdit) {
+        emits('update', params);
+    } else {
+        emits('submit', params);
+    }
 };
+
+onMounted(() => {
+    console.log('selected : ', props.selected);
+    if (props.selected) {
+        name.value = props.selected.name ?? '';
+    }
+});
 </script>

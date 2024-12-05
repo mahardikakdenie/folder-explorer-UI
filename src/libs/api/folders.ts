@@ -60,3 +60,13 @@ export const createFolders = (params: any, callback: any, errorCallback: any) =>
 			errorCallback(e);
 		})
 };
+
+export const updateFolderData = (id: number, params: any, callback: any, errorCallback: any) => {
+	client.put(`${endpoint}/update/${id}`, params)
+	.then((res) => {
+        callback(res.data);
+    })
+    .catch((e) => {
+        errorCallback(e);
+    });
+};

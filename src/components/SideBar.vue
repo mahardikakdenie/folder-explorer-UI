@@ -68,11 +68,6 @@
 
 			<!-- Folder Creation Button -->
 			<div v-if="!isLoading" class="w-full mt-8">
-				<ul class="pl-6 space-y-1 mt-2 relative">
-					<li>
-						halo
-					</li>
-				</ul>
 				<button
 					class="border border-slate-600 rounded-lg w-full p-1 text-sm hover:bg-slate-700">
 					<small>Buat Folder</small>

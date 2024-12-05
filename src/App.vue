@@ -114,9 +114,11 @@
 
 		<CreateModal
 			v-if="isModalCreateVisible"
-			:hide-icon="history.length > 0"
+			:hide-icon="history.length > 0 || selectedItem"
+			:selected="selectedItem"
 			@close="isModalCreateVisible = false"
 			@submit="createFolder"
+			@update="updateFolder"
 		/>
 	</div>
 </template>
@@ -129,7 +131,7 @@ import CreateModal from './components/CreateModal.vue';
 import ActionModal from './components/ActionModal.vue';
 import { folders } from './libs/static';
 import Documents, { Subfolder } from './components/Documents.vue';
-import { createFolders, getData, getDataSub } from './libs/api/folders';
+import { createFolders, getData, getDataSub, updateFolderData } from './libs/api/folders';
 
 const menus = ref(folders);
 
@@ -223,10 +225,8 @@ const handleDocRightClck = (event: MouseEvent, subfolder?: Subfolder) => {
 	selectedItem.value = subfolder;
 	if (selectedItem.value) {
 		contextMenuDocs.value = [
-			{ label: 'Open', action: 'open', icon: 'fa fa-folder-open' },
 			{ label: 'Delete', action: 'delete', icon: 'fa fa-trash' },
 			{ label: 'Rename', action: 'rename', icon: 'fa fa-edit' },
-			{ label: 'Info', action: 'Info', icon: 'fa fa-info-circle' },
 		];
 	} else {
 		contextMenuDocs.value = [
@@ -273,6 +273,51 @@ const createFolder = (params: any, type: string) => {
 	}, callback, err);
 };
 
+const updateFolder = (params: any) => {
+	console.log('update :', params);
+
+	const callback = (res: any) => {
+		const data = res?.data
+
+		// Pastikan selectedFolder tidak null atau undefined sebelum mengakses value
+		if (selectedFolder?.value) {
+			selectedFolder.value.name = data?.name ?? '';
+		}
+
+		console.log("🚀 ~ callback ~ history.value.length:", history.value.length)
+		console.log("🚀 ~ callback ~ selectedFolder.value:", selectedFolder.value)
+		console.log("🚀 ~ callback ~ generalFolder.value?.children:", generalFolder.value?.children)
+		if (history.value.length === 0) {
+			const index = generalFolder.value?.children?.findIndex(curr => curr?.id === params?.id);
+			console.log("🚀 ~ callback ~ index:", index)
+
+			if (index && index !== -1) {
+				console.log("🚀 ~ callback ~ generalFolder.value?.children:", generalFolder.value?.children)
+				if (generalFolder.value?.children) {
+					generalFolder.value.children[index].name = params?.name
+					console.log("🚀 ~ callback ~ generalFolder.value?.childre:", generalFolder.value?.children?.[index]);
+				}
+			}
+		} else {
+			if (selectedFolder.value) {
+				const index = selectedFolder.value.children?.findIndex(curr => curr?.id === params?.id);
+
+				if (index && index !== -1) {
+					if (selectedFolder.value.children) {
+						selectedFolder.value.children[index].name = params?.name;
+					}
+				}
+			}
+		}
+
+		isModalCreateVisible.value = false;
+	};
+
+	const err = (e:any) => console.log(e);
+
+	updateFolderData(params.id, {name: params.name}, callback, err);
+}
+
 const ondblclick = (subfolder: Subfolder) => {
 	getSubDocs(subfolder.id ?? 0);
 	history.value.push(subfolder || '');
@@ -287,6 +332,9 @@ const onMenuOptionClick = (key: string) => {
 	console.log(key);
 	if (key === 'create') {
 		isModalCreateVisible.value = true;
+	} else if (key === 'rename') {
+		isModalCreateVisible.value = true;
+		
 	}
 };
 
