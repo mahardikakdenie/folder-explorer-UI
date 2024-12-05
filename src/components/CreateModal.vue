@@ -1,5 +1,5 @@
 <template>
-	<modal title="Buat Folder">
+	<modal :title="modalTitle">
 		<template #body>
 			<div class="p-3 space-y-2">
 				<div class="">
@@ -19,7 +19,7 @@
 								v-for="icon in icons"
 								:key="icon"
 								class="border p-2 flex justify-center hover:bg-blue-200 rounded-md cursor-pointer" :class="{'bg-blue-200': selectedIcon === icon}"
-                                @click="selectedIcon = icon"
+                                @click="onSelectIcon(icon)"
                             >
 								<i
 									:class="`${icon} text-blue-600`"
@@ -69,7 +69,7 @@ const props = defineProps({
 });
 
 const name = ref<string>('');
-const selectedIcon = ref<string>('');
+const selectedIcon = ref<string | null>(null);
 const icons = ref<string[]>([
 	'fa fa-folder',
 	'fa fa-folder-open-o',
@@ -121,18 +121,24 @@ const icons = ref<string[]>([
 	'fa fa-flag',
 ]);
 
+const onSelectIcon = (icon: string) => {
+    selectedIcon.value = icon
+}
 
 const isEdit = computed(() => {
-	return props.selected !== null;
-})
+	return props.selected && props.selected.name && props.selected.name !== '';
+});
+
+const modalTitle = computed(() => isEdit.value ? 'Edit Folder' : 'Buat Folder');
 const emits = defineEmits(['submit', 'update', 'close']);
 const submit = () => {
     const params ={
-        id: props.selected.id,
+        id: props?.selected?.id ?? null,
         name: name.value,
-        icon: selectedIcon?.value,
+        icon: selectedIcon?.value || 'fa fa-folder',
     }
-    if (isEdit) {
+    
+    if (isEdit.value) {
         emits('update', params);
     } else {
         emits('submit', params);
@@ -140,7 +146,6 @@ const submit = () => {
 };
 
 onMounted(() => {
-    console.log('selected : ', props.selected);
     if (props.selected) {
         name.value = props.selected.name ?? '';
     }

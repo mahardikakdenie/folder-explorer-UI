@@ -70,3 +70,13 @@ export const updateFolderData = (id: number, params: any, callback: any, errorCa
         errorCallback(e);
     });
 };
+
+export const deleteFolderData = (id: number, callback: any, errorCallback: any) => {
+	client.delete(`${endpoint}/delete/${id}`)
+	.then((res) => {
+        callback(res.data);
+    })
+    .catch((e) => {
+        errorCallback(e);
+    });
+};

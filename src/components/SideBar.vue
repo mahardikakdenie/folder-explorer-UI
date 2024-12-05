@@ -69,7 +69,9 @@
 			<!-- Folder Creation Button -->
 			<div v-if="!isLoading" class="w-full mt-8">
 				<button
-					class="border border-slate-600 rounded-lg w-full p-1 text-sm hover:bg-slate-700">
+					class="border border-slate-600 rounded-lg w-full p-1 text-sm hover:bg-slate-700"
+					@click="onMenuOptionClick('create')"
+				>
 					<small>Buat Folder</small>
 				</button>
 			</div>
@@ -153,12 +155,11 @@ const handleRightClick = (event: MouseEvent) => {
 const isModalCreateVisible = ref<boolean>(false);
 const onMenuOptionClick = (key: string) => {
 	if (key === 'create') {
-		console.log(key)
 		isModalCreateVisible.value = true;
 	}
 }
 
-const emits = defineEmits(['create-folder', 'selected', 'toggle']);
+const emits = defineEmits(['create-folder', 'selected', 'toggle', 'open-modal-create']);
 
 const createFolder = (params: { name: string; icon: string }) => {
 	emits('create-folder', params, 'sidebar');

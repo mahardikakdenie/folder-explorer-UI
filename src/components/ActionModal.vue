@@ -38,7 +38,6 @@ defineProps({
 const emits = defineEmits(['on-click']);
 
 const onMenuOptionClick = (key: string) => {
-    console.log("🚀 ~ onMenuOptionClick ~ key:", key)
     emits('on-click', key);
 };
 </script>
