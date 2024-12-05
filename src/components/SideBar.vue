@@ -68,6 +68,11 @@
 
 			<!-- Folder Creation Button -->
 			<div v-if="!isLoading" class="w-full mt-8">
+				<ul class="pl-6 space-y-1 mt-2 relative">
+					<li>
+						halo
+					</li>
+				</ul>
 				<button
 					class="border border-slate-600 rounded-lg w-full p-1 text-sm hover:bg-slate-700">
 					<small>Buat Folder</small>
@@ -80,7 +85,14 @@
 			:context-menu-y="contextMenuY"
 			:context-menu-x="contextMenuX"
 			:context-menu-docs="contextMenuOptions"
-			@on-click="onMenuOptionClick" />
+			@on-click="onMenuOptionClick" 
+		/>
+		
+		<CreateModal
+			v-if="isModalCreateVisible"
+			@close="isModalCreateVisible = false"
+			@submit="createFolder"
+		/>
 	</div>
 </template>
 
@@ -88,6 +100,7 @@
 import LoadingSection from './Loading.vue';
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import ActionModal from './ActionModal.vue';
+import CreateModal from './CreateModal.vue';
 // import { watch } from 'vue';
 // Define folder and child types
 interface Child {
@@ -142,14 +155,24 @@ const handleRightClick = (event: MouseEvent) => {
 	];
 };
 
+const isModalCreateVisible = ref<boolean>(false);
 const onMenuOptionClick = (key: string) => {
-    console.log(key)
+	if (key === 'create') {
+		console.log(key)
+		isModalCreateVisible.value = true;
+	}
 }
+
+const emits = defineEmits(['create-folder', 'selected', 'toggle']);
+
+const createFolder = (params: { name: string; icon: string }) => {
+	emits('create-folder', params, 'sidebar');
+	isModalCreateVisible.value = false;
+};
 
 const closeContextMenu = () => {
 	contextMenuVisible.value = false;
 };
-
 
 onMounted(() => {
 	window.addEventListener('click', closeContextMenu);

@@ -2,11 +2,13 @@
 	<div class="flex h-screen">
 		<!-- Sidebar -->
 		<Sidebar
-			:folders="menus"
+			:folders.sync="menus"
 			:is-loading="isFetching"
 			:history="history"
 			@selected="setSelectedFolder"
-			@toggle="setToggle" />
+			@toggle="setToggle"
+			@create-folder="createFolder"
+		/>
 
 		<!-- Main Content -->
 		<div class="w-full flex flex-col">
@@ -89,9 +91,11 @@
 					<LoadingSection v-else />
 				</div>
 				<div v-else>
-					<p class="text-lg text-gray-500">
-						Select a folder to view its contents.
-					</p>
+					<Documents
+						:selected-folder="generalFolder"
+						@handle-right-click="handleDocRightClck"
+						@on-double-click="ondblclick" 
+					/>
 				</div>
 			</div>
 		</div>
@@ -108,7 +112,12 @@
 			:context-menu-docs="contextMenuDocs"
 			@on-click="onMenuOptionClick" />
 
-    <CreateModal v-if="isModalCreateVisible" @close="isModalCreateVisible = false" />
+		<CreateModal
+			v-if="isModalCreateVisible"
+			:hide-icon="history.length > 0"
+			@close="isModalCreateVisible = false"
+			@submit="createFolder"
+		/>
 	</div>
 </template>
 
@@ -116,11 +125,11 @@
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import Sidebar from './components/SideBar.vue';
 import LoadingSection from './components/Loading.vue';
-import CreateModal from './components/Modal.vue';
+import CreateModal from './components/CreateModal.vue';
 import ActionModal from './components/ActionModal.vue';
 import { folders } from './libs/static';
 import Documents, { Subfolder } from './components/Documents.vue';
-import { getData, getDataSub } from './libs/api/folders';
+import { createFolders, getData, getDataSub } from './libs/api/folders';
 
 const menus = ref(folders);
 
@@ -135,6 +144,7 @@ const contextMenuDocs = ref<any>([]);
 
 // State
 const selectedFolder = ref<Subfolder | null>(null);
+const generalFolder = ref<Subfolder | undefined>(undefined);
 // const searchQuery = ref('');
 const contextMenuVisible = ref(false);
 const contextMenuX = ref(0);
@@ -189,9 +199,9 @@ const folderHistory = computed(() => {
 });
 
 const goBack = (history: any) => {
-  if (history) {
-    setSelectedFolder(history, history);
-  }
+	if (history) {
+		setSelectedFolder(history, history);
+	}
 };
 
 const handleRightClick = (event: MouseEvent) => {
@@ -242,6 +252,27 @@ const getSubDocs = (documentId: number) => {
 	getDataSub(documentId, { entities: 'children.children' }, callback, err);
 };
 
+const createFolder = (params: any, type: string) => {
+	const callback = (res: any) => {
+		const data = res?.data?.data;
+
+		if (type === 'sidebar') {
+			menus.value.push(data);
+		} else {
+			isModalCreateVisible.value = false;
+			selectedFolder.value?.children?.push(data);
+		}
+	}
+
+	const err = (e: any) => console.log(e);
+
+	createFolders({
+		name: params.name,
+		icon: history.value.length === 0 ? params?.icon : 'fa fa-folder',
+		parent_id: selectedFolder?.value?.id ?? null,
+	}, callback, err);
+};
+
 const ondblclick = (subfolder: Subfolder) => {
 	getSubDocs(subfolder.id ?? 0);
 	history.value.push(subfolder || '');
@@ -254,9 +285,9 @@ const closeContextMenu = () => {
 
 const onMenuOptionClick = (key: string) => {
 	console.log(key);
-  if (key === 'create') {
-    isModalCreateVisible.value = true;
-  }
+	if (key === 'create') {
+		isModalCreateVisible.value = true;
+	}
 };
 
 const getDataFolders = () => {
@@ -266,6 +297,16 @@ const getDataFolders = () => {
 		menus.value = res?.data;
 		isFetching.value = false;
 		isLoading.value = false;
+
+		generalFolder.value = {
+			id: 1,
+			name: 'haha',
+			icon: '',
+			children: res?.data,
+		}
+		console.log("🚀 ~ callback ~ generalFolder:", generalFolder.value)
+		isLoading.value = false;
+		console.log("🚀 ~ generalFolder.value=data.map ~ generalFolder.value:", generalFolder.value)
 	};
 
 	const err = (e: any) => console.log(e);

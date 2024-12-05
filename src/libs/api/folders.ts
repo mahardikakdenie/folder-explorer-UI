@@ -50,3 +50,13 @@ export const getDataSub = (id: number, params: any, callback: any, errorCallback
         errorCallback(e);
     });
 };
+
+export const createFolders = (params: any, callback: any, errorCallback: any) => {
+	client.post(endpoint, params)
+		.then(res => {
+			callback(res);
+		})
+		.catch(e => {
+			errorCallback(e);
+		})
+};
