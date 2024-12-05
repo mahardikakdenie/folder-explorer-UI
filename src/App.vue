@@ -274,7 +274,6 @@ const createFolder = (params: any, type: string) => {
 };
 
 const updateFolder = (params: any) => {
-	console.log('update :', params);
 
 	const callback = (res: any) => {
 		const data = res?.data
@@ -283,19 +282,12 @@ const updateFolder = (params: any) => {
 		if (selectedFolder?.value) {
 			selectedFolder.value.name = data?.name ?? '';
 		}
-
-		console.log("🚀 ~ callback ~ history.value.length:", history.value.length)
-		console.log("🚀 ~ callback ~ selectedFolder.value:", selectedFolder.value)
-		console.log("🚀 ~ callback ~ generalFolder.value?.children:", generalFolder.value?.children)
 		if (history.value.length === 0) {
 			const index = generalFolder.value?.children?.findIndex(curr => curr?.id === params?.id);
-			console.log("🚀 ~ callback ~ index:", index)
 
 			if (index && index !== -1) {
-				console.log("🚀 ~ callback ~ generalFolder.value?.children:", generalFolder.value?.children)
 				if (generalFolder.value?.children) {
 					generalFolder.value.children[index].name = params?.name
-					console.log("🚀 ~ callback ~ generalFolder.value?.childre:", generalFolder.value?.children?.[index]);
 				}
 			}
 		} else {
@@ -329,7 +321,6 @@ const closeContextMenu = () => {
 };
 
 const onMenuOptionClick = (key: string) => {
-	console.log(key);
 	if (key === 'create') {
 		isModalCreateVisible.value = true;
 	} else if (key === 'rename') {
@@ -352,9 +343,7 @@ const getDataFolders = () => {
 			icon: '',
 			children: res?.data,
 		}
-		console.log("🚀 ~ callback ~ generalFolder:", generalFolder.value)
 		isLoading.value = false;
-		console.log("🚀 ~ generalFolder.value=data.map ~ generalFolder.value:", generalFolder.value)
 	};
 
 	const err = (e: any) => console.log(e);
