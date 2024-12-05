@@ -97,7 +97,7 @@ import {
 	updateFolderData,
 } from './libs/api/folders';
 
-const menus = ref(folders);
+const menus = ref<any>(folders);
 
 const contextMenuOptions = ref([
 	{ label: 'Open', action: 'open', icon: 'fa fa-folder-open' },
@@ -232,6 +232,12 @@ const deleteData = (selected: any) => {
 					generalFolder.value.children = []
 				}
 				generalFolder.value?.children?.splice(index, 1)
+			}
+
+			const indexMenus = menus.value.findIndex((curr:any) => curr?.id === data.id);
+
+			if ((indexMenus && indexMenus !== -1) || indexMenus === 0) {
+				menus.value.splice(indexMenus, 1);
 			}
 		} else {
 			if (selectedFolder.value) {
