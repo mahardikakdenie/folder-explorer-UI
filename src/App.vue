@@ -275,7 +275,6 @@ const createFolder = (params: any, type: string) => {
 				}
 			} else {
 				if (selectedFolder.value) {
-					console.log('halo');
 
 					if (selectedFolder.value.children) {
 						selectedFolder.value.children.push(data);
@@ -283,11 +282,9 @@ const createFolder = (params: any, type: string) => {
 							const indexParent = menus.value.findIndex((curr: any) => curr?.id === data?.parent_id);
 
 							if ((indexParent && indexParent !== -1) || indexParent === 0) {
-								console.log(menus.value[indexParent]);
 								menus.value[indexParent].children.push(data);
 							}
 						}
-						console.log("🚀 ~ callback ~ selectedFolder.value:", selectedFolder.value)
 					}
 				}
 			}
