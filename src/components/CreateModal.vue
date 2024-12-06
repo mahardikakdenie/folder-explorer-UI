@@ -40,7 +40,8 @@
 					Cancel
 				</button>
 				<button
-					class="text-sm border rounded-md px-4 bg-blue-500 text-white py-1"
+					class="text-sm border rounded-md px-4 bg-blue-500 text-white py-1 disabled:bg-blue-300"
+                    :disabled="isDisabled"
 					@click="submit">
 					Submit
 				</button>
@@ -129,7 +130,6 @@ const onSelectIcon = (icon: string) => {
     selectedIcon.value = icon
 }
 
-
 const modalTitle = computed(() => props.type === 'rename' ? 'Edit Folder' : 'Buat Folder');
 const emits = defineEmits(['submit', 'update', 'close']);
 const submit = () => {
@@ -145,6 +145,8 @@ const submit = () => {
         emits('submit', params);
     }
 };
+
+const isDisabled = computed(() => !name.value);
 
 onMounted(() => {
     if (props.selected && props.type === 'rename') {

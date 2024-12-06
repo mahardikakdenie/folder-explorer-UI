@@ -265,19 +265,20 @@ const createFolder = (params: any, type: string) => {
 		const data = res?.data?.data;
 
 		if (type === 'sidebar') {
-			menus.value.push(data);
+			menus.value.push({ ...data, children: [] });
 		} else {
 			isModalCreateVisible.value = false;
 
 			if (history.value.length === 0) {
 				if (generalFolder.value?.children) {
-					generalFolder.value.children.push(data);
+					generalFolder.value.children.push({ ...data, children: [] });
 				}
 			} else {
 				if (selectedFolder.value) {
 
 					if (selectedFolder.value.children) {
 						selectedFolder.value.children.push(data);
+						console.log("🚀 ~ callback ~ selectedFolder?.value?.isOpen === undefined:", selectedFolder?.value?.isOpen === undefined)
 						if (selectedFolder?.value?.isOpen === undefined) {
 							const indexParent = menus.value.findIndex((curr: any) => curr?.id === data?.parent_id);
 
