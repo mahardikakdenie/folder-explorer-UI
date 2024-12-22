@@ -82,6 +82,7 @@ export interface Folder {
 	name?: string;
 	icon?: string;
 	children?: Subfolder[];
+	parent?: Folder,
 }
 
 // Define props with types
