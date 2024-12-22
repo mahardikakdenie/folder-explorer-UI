@@ -153,7 +153,7 @@ const contextMenuOptions = ref([
 const contextMenuDocs = ref<any>([]);
 
 // State
-const selectedFolder = ref<Subfolder | null>(null);
+const selectedFolder = ref<Subfolder>();
 const generalFolder = ref<Subfolder | undefined>(undefined);
 // const searchQuery = ref('');
 const contextMenuVisible = ref(false);
@@ -186,22 +186,19 @@ const setSelectedFolder = (folder: any) => {
 		(curr: any) => curr?.id === folder?.id
 	);
 	if (history.value.length > 0) {
-		// Cek apakah id pertama di history berbeda dengan folder id yang sedang diproses
 		if (history.value[0].id !== folder?.id && index === -1) {
-			history.value = []; // Reset history jika id pertama berbeda
+			history.value = [];
 		} else if (history.value[0].id === folder?.id && index === -1) {
-			// Jika id pertama sama, tambahkan subfolder ke history
 			history.value.push(folder);
 		} else {
 			if (index !== -1) {
-				// Jika ditemukan, hapus elemen setelah index pertama yang ditemukan
 				history.value = history.value.slice(0, index + 1);
 			}
 		}
-	} else {
-		// Jika history kosong, tambahkan folder pertama
-		history.value.push(folder);
-	}
+	} 
+	// else {
+	// 	history.value.push(folder);
+	// }
 };
 
 const folderHistory = computed(() => {
@@ -212,7 +209,7 @@ const goBack = (folderHistory: any) => {
 	if (folderHistory) {
 		setSelectedFolder(folderHistory);
 	} else {
-		selectedFolder.value = null;
+		selectedFolder.value = undefined;
 		history.value = [];
 	}
 };
@@ -302,7 +299,7 @@ const deleteData = (selected: any) => {
 		}
 
 		isConfirmModalVisible.value = false;
-		selectedFolder.value = null;
+		selectedFolder.value = {};
 	};
 
 	const err = (e: any) => console.log(e);
@@ -343,6 +340,16 @@ const createFolder = (params: any, type: string) => {
 							}
 						}
 					}
+
+
+					// Checking not duplicate data
+					selectedFolder.value.children = selectedFolder?.value?.children?.filter((item, index, self) => index === self.findIndex((t) => t.id === item.id));
+				}
+
+				const activeFolder = history?.value?.findIndex((curr: any) => curr?.id === selectedFolder.value?.id);
+
+				if (activeFolder !== -1) {
+					history.value[activeFolder].children.push(data);
 				}
 			}
 		}
