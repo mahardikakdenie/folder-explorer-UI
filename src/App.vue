@@ -24,10 +24,11 @@
 							aria-hidden="true"></i>
 					</button>
 					<div class="flex items-center space-x-2">
-						<small
+						<button
 							v-for="(history, index) in folderHistory"
 							:key="index"
-							class="hover:text-blue-600 hover:underline cursor-pointer transition duration-300 ease-in-out"
+							class="hover:text-blue-600 transition duration-300 ease-in-out text-[12px]"
+							:disabled="index === folderHistory.length - 1"
 							@click="setSelectedFolder(history)">
 							{{ history?.name }}
 							<!-- Gunakan ikon Font Awesome sebagai pemisah -->
@@ -37,7 +38,7 @@
 								<i class="fa fa-arrow-right"></i>
 								<!-- Ikon panah kanan -->
 							</small>
-						</small>
+						</button>
 					</div>
 				</div>
 				<!-- Folder Creation Button -->
@@ -180,6 +181,10 @@ const setToggle = (index: number) => {
 const setSelectedFolder = (folder: any) => {
 	parentFolder.value = folder?.name;
 	selectedFolder.value = folder;
+	if (selectedFolder.value) {
+		selectedFolder.value.children = selectedFolder?.value?.children?.filter((item, index, self) => index === self.findIndex((t) => t.id === item.id));
+		getSubDocs(folder.id);
+	}
 	subFolder.value = folder.name;
 
 	const index = history.value.findIndex(
@@ -343,7 +348,10 @@ const createFolder = (params: any, type: string) => {
 
 
 					// Checking not duplicate data
-					selectedFolder.value.children = selectedFolder?.value?.children?.filter((item, index, self) => index === self.findIndex((t) => t.id === item.id));
+					if (selectedFolder?.value?.children && selectedFolder?.value?.children?.length > 0) {
+						selectedFolder.value.children = selectedFolder?.value?.children?.filter((item, index, self) => index === self.findIndex((t) => t.id === item.id));
+						console.log("🚀 ~ callback ~ selectedFolder.value.children:", selectedFolder.value.children)
+					}
 				}
 
 				const activeFolder = history?.value?.findIndex((curr: any) => curr?.id === selectedFolder.value?.id);
