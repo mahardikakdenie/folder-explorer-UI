@@ -1,25 +1,39 @@
 <template>
 	<div class="flex h-screen">
 		<!-- Sidebar -->
-		<Sidebar :folders="menus" :is-loading="isFetching" :history="history" @selected="setSelectedFolder"
-			@toggle="setToggle" @create-folder="createFolder" @open-modal-create="onMenuOptionClick('create')" />
+		<Sidebar
+			:folders="menus"
+			:is-loading="isFetching"
+			:history="history"
+			@selected="setSelectedFolder"
+			@toggle="setToggle"
+			@create-folder="createFolder"
+			@open-modal-create="onMenuOptionClick('create')" />
 
 		<!-- Main Content -->
 		<div class="w-full flex flex-col">
 			<!-- Header / Toolbar -->
-			<div class="bg-gray-100 p-4 shadow-md flex items-center space-x-4 justify-between">
+			<div
+				class="bg-gray-100 p-4 shadow-md flex items-center space-x-4 justify-between">
 				<div class="flex gap-2">
-					<button @click="goBack(folderHistory[folderHistory.length - 2])"
+					<button
+						@click="goBack(folderHistory?.[folderHistory?.length - 2])"
 						class="px-2 border border-blue-500 rounded-md">
-						<i class="fa fa-chevron-left text-blue-500" aria-hidden="true"></i>
+						<i
+							class="fa fa-chevron-left text-blue-500"
+							aria-hidden="true"></i>
 					</button>
 					<div class="flex items-center space-x-2">
-						<small v-for="(history, index) in folderHistory" :key="index"
+						<small
+							v-for="(history, index) in folderHistory"
+							:key="index"
 							class="hover:text-blue-600 hover:underline cursor-pointer transition duration-300 ease-in-out"
-							@click="setSelectedFolder(history, history)">
-							{{ history.name }}
+							@click="setSelectedFolder(history)">
+							{{ history?.name }}
 							<!-- Gunakan ikon Font Awesome sebagai pemisah -->
-							<small v-if="index !== folderHistory.length - 1" class="mx-2 text-gray-500">
+							<small
+								v-if="index !== folderHistory.length - 1"
+								class="mx-2 text-gray-500">
 								<i class="fa fa-arrow-right"></i>
 								<!-- Ikon panah kanan -->
 							</small>
@@ -28,7 +42,8 @@
 				</div>
 				<!-- Folder Creation Button -->
 				<div v-if="!isLoading">
-					<button class="border border-slate-600 rounded-lg w-full p-1 text-sm hover:bg-slate-700"
+					<button
+						class="border border-slate-600 rounded-lg w-full p-1 text-sm hover:bg-slate-700"
 						@click="onMenuOptionClick('create')">
 						<small>Buat Folder</small>
 					</button>
@@ -38,42 +53,73 @@
 			<hr />
 
 			<!-- Main Content (Subfolders Only) -->
-			<div class="flex-1 p-6 bg-gray-50" @contextmenu="handleRightClick($event)">
+			<div
+				class="flex-1 p-6 bg-gray-50"
+				@contextmenu="handleRightClick($event)">
 				<div v-if="selectedFolder">
 					<!-- <h2 class="text-2xl font-semibold">{{ subFolder }}</h2> -->
 
 					<!-- Displaying the folder contents (only subfolders) -->
-					<div v-if="
-						!selectedFolder.children ||
-						selectedFolder.children.length === 0
-					" class="flex justify-center">
-						<img src="https://i.ibb.co.com/zQMFnyg/folder-1.png" alt="" srcset="" />
+					<div
+						v-if="
+							!selectedFolder.children ||
+							selectedFolder.children.length === 0
+						"
+						class="flex justify-center">
+						<img
+							src="https://i.ibb.co.com/zQMFnyg/folder-1.png"
+							alt=""
+							srcset="" />
 					</div>
 
 					<!-- Grid of subfolders -->
-					<Documents v-if="
-						!isLoading &&
-						selectedFolder.children &&
-						selectedFolder.children.length > 0
-					" :isLoading="isLoading" :selected-folder="selectedFolder" @handle-right-click="handleDocRightClck"
+					<Documents
+						v-if="
+							!isLoading &&
+							selectedFolder &&
+							selectedFolder.children &&
+							selectedFolder.children.length > 0
+						"
+						:isLoading="isLoading"
+						:selected-folder="selectedFolder"
+						@handle-right-click="handleDocRightClck"
 						@on-double-click="ondblclick" />
 					<LoadingSection v-else />
 				</div>
 				<div v-else>
-					<Documents :selected-folder="generalFolder" @handle-right-click="handleDocRightClck"
+					<Documents
+						:selected-folder="generalFolder"
+						@handle-right-click="handleDocRightClck"
 						@on-double-click="ondblclick" />
 				</div>
 			</div>
 		</div>
-		<ActionModal v-if="contextMenuVisible" :context-menu-y="contextMenuY" :context-menu-x="contextMenuX"
-			:context-menu-docs="contextMenuOptions" @on-click="onMenuOptionClick" />
-		<ActionModal v-if="contextDocsMenu" :context-menu-y="contextMenuY" :context-menu-x="contextMenuX"
-			:context-menu-docs="contextMenuDocs" @on-click="onMenuOptionClick" />
+		<ActionModal
+			v-if="contextMenuVisible"
+			:context-menu-y="contextMenuY"
+			:context-menu-x="contextMenuX"
+			:context-menu-docs="contextMenuOptions"
+			@on-click="onMenuOptionClick" />
+		<ActionModal
+			v-if="contextDocsMenu"
+			:context-menu-y="contextMenuY"
+			:context-menu-x="contextMenuX"
+			:context-menu-docs="contextMenuDocs"
+			@on-click="onMenuOptionClick" />
 
-		<CreateModal v-if="isModalCreateVisible" :hide-icon="history.length >= 0" :selected="selectedItem"
-			@close="isModalCreateVisible = false" :type="modalType" @submit="createFolder" @update="updateFolder" />
+		<CreateModal
+			v-if="isModalCreateVisible"
+			:hide-icon="history.length >= 0"
+			:selected="selectedItem"
+			@close="isModalCreateVisible = false"
+			:type="modalType"
+			@submit="createFolder"
+			@update="updateFolder" />
 
-		<ConfirmModal v-if="isConfirmModalVisible" :selected="selectedItem" @close="isConfirmModalVisible = false"
+		<ConfirmModal
+			v-if="isConfirmModalVisible"
+			:selected="selectedItem"
+			@close="isConfirmModalVisible = false"
 			@submit="deleteData" />
 	</div>
 </template>
@@ -131,13 +177,13 @@ const setToggle = (index: number) => {
 	history.value.push(menus.value[index]);
 };
 
-const setSelectedFolder = (folder: any, subfolder: any) => {
+const setSelectedFolder = (folder: any) => {
 	parentFolder.value = folder?.name;
-	selectedFolder.value = subfolder;
-	subFolder.value = subfolder.name;
+	selectedFolder.value = folder;
+	subFolder.value = folder.name;
 
 	const index = history.value.findIndex(
-		(curr: any) => curr?.id === subfolder?.id
+		(curr: any) => curr?.id === folder?.id
 	);
 	if (history.value.length > 0) {
 		// Cek apakah id pertama di history berbeda dengan folder id yang sedang diproses
@@ -145,7 +191,7 @@ const setSelectedFolder = (folder: any, subfolder: any) => {
 			history.value = []; // Reset history jika id pertama berbeda
 		} else if (history.value[0].id === folder?.id && index === -1) {
 			// Jika id pertama sama, tambahkan subfolder ke history
-			history.value.push(subfolder);
+			history.value.push(folder);
 		} else {
 			if (index !== -1) {
 				// Jika ditemukan, hapus elemen setelah index pertama yang ditemukan
@@ -162,9 +208,12 @@ const folderHistory = computed(() => {
 	return history.value;
 });
 
-const goBack = (history: any) => {
-	if (history) {
-		setSelectedFolder(history, history);
+const goBack = (folderHistory: any) => {
+	if (folderHistory) {
+		setSelectedFolder(folderHistory);
+	} else {
+		selectedFolder.value = null;
+		history.value = [];
 	}
 };
 
@@ -225,14 +274,15 @@ const deleteData = (selected: any) => {
 				(curr) => curr?.id === data?.id
 			);
 			if ((index && index !== -1) || index === 0) {
-
 				if (generalFolder.value?.children?.length === 1) {
-					generalFolder.value.children = []
+					generalFolder.value.children = [];
 				}
-				generalFolder.value?.children?.splice(index, 1)
+				generalFolder.value?.children?.splice(index, 1);
 			}
 
-			const indexMenus = menus.value.findIndex((curr: any) => curr?.id === data.id);
+			const indexMenus = menus.value.findIndex(
+				(curr: any) => curr?.id === data.id
+			);
 
 			if ((indexMenus && indexMenus !== -1) || indexMenus === 0) {
 				menus.value.splice(indexMenus, 1);
@@ -245,7 +295,7 @@ const deleteData = (selected: any) => {
 
 				if ((index && index !== -1) || index === 0) {
 					if (selectedFolder.value.children) {
-						selectedFolder.value.children.splice(index, 1)
+						selectedFolder.value.children.splice(index, 1);
 					}
 				}
 			}
@@ -258,7 +308,7 @@ const deleteData = (selected: any) => {
 	const err = (e: any) => console.log(e);
 
 	deleteFolderData(selected?.id, callback, err);
-}
+};
 
 const createFolder = (params: any, type: string) => {
 	const callback = (res: any) => {
@@ -271,25 +321,30 @@ const createFolder = (params: any, type: string) => {
 
 			if (history.value.length === 0) {
 				if (generalFolder.value?.children) {
-					generalFolder.value.children.push({ ...data, children: [] });
+					generalFolder.value.children.push({
+						...data,
+						children: [],
+					});
 				}
 			} else {
 				if (selectedFolder.value) {
-
 					if (selectedFolder.value.children) {
 						selectedFolder.value.children.push(data);
-						console.log("🚀 ~ callback ~ selectedFolder?.value?.isOpen === undefined:", selectedFolder?.value?.isOpen === undefined)
 						if (selectedFolder?.value?.isOpen === undefined) {
-							const indexParent = menus.value.findIndex((curr: any) => curr?.id === data?.parent_id);
+							const indexParent = menus.value.findIndex(
+								(curr: any) => curr?.id === data?.parent_id
+							);
 
-							if ((indexParent && indexParent !== -1) || indexParent === 0) {
+							if (
+								(indexParent && indexParent !== -1) ||
+								indexParent === 0
+							) {
 								menus.value[indexParent].children.push(data);
 							}
 						}
 					}
 				}
 			}
-
 		}
 
 		// selectedFolder.value = null;
