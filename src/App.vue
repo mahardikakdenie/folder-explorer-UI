@@ -17,7 +17,9 @@
 				class="bg-gray-100 p-4 shadow-md flex items-center space-x-4 justify-between">
 				<div class="flex gap-2">
 					<button
-						@click="goBack(folderHistory?.[folderHistory?.length - 2])"
+						@click="
+							goBack(folderHistory?.[folderHistory?.length - 2])
+						"
 						class="px-2 border border-blue-500 rounded-md">
 						<i
 							class="fa fa-chevron-left text-blue-500"
@@ -178,32 +180,50 @@ const setToggle = (index: number) => {
 	history.value.push(menus.value[index]);
 };
 
-const setSelectedFolder = (folder: any) => {
-	parentFolder.value = folder?.name;
-	selectedFolder.value = folder;
-	if (selectedFolder.value) {
-		selectedFolder.value.children = selectedFolder?.value?.children?.filter((item, index, self) => index === self.findIndex((t) => t.id === item.id));
-		getSubDocs(folder.id);
-	}
-	subFolder.value = folder.name;
+const setSelectedFolder = (
+    folder: any,
+    isSidebar: boolean | undefined = false
+) => {
+    parentFolder.value = folder?.name;
+    selectedFolder.value = folder;
 
-	const index = history.value.findIndex(
-		(curr: any) => curr?.id === folder?.id
-	);
-	if (history.value.length > 0) {
-		if (history.value[0].id !== folder?.id && index === -1) {
-			history.value = [];
-		} else if (history.value[0].id === folder?.id && index === -1) {
-			history.value.push(folder);
-		} else {
-			if (index !== -1) {
-				history.value = history.value.slice(0, index + 1);
-			}
-		}
-	} 
-	// else {
-	// 	history.value.push(folder);
-	// }
+    if (selectedFolder.value) {
+        selectedFolder.value.children = (selectedFolder?.value?.children || []).filter(
+            (item, index, self) => index === self.findIndex((t) => t.id === item.id)
+        );
+        getSubDocs(folder.id);
+    }
+
+    subFolder.value = folder.name;
+
+    if (isSidebar) {
+        updateHistoryForSidebar(folder);
+    } else {
+        updateHistory(folder);
+    }
+};
+
+const updateHistoryForSidebar = (folder: any) => {
+    history.value = [];
+
+    if (folder?.parent) {
+        history.value.push(folder?.parent, folder);
+    }
+};
+
+const updateHistory = (folder: any) => {
+    if (history.value.length === 0 || !history.value.some((curr: any) => curr?.id === folder?.id)) {
+        history.value = [folder];
+        return;
+    }
+
+    const folderIndex = history.value.findIndex((curr: any) => curr?.id === folder?.id);
+
+    if (folderIndex !== -1) {
+        history.value = history.value.slice(0, folderIndex + 1);
+    } else {
+        history.value.push(folder);
+    }
 };
 
 const folderHistory = computed(() => {
@@ -262,7 +282,12 @@ const getSubDocs = (documentId: number) => {
 
 	const err = (e: any) => console.log(e);
 
-	getDataSub(documentId, { entities: 'children.children' }, callback, err);
+	getDataSub(
+		documentId,
+		{ entities: 'children.children,children.parent' },
+		callback,
+		err
+	);
 };
 
 const isConfirmModalVisible = ref<boolean>(false);
@@ -346,15 +371,27 @@ const createFolder = (params: any, type: string) => {
 						}
 					}
 
-
 					// Checking not duplicate data
-					if (selectedFolder?.value?.children && selectedFolder?.value?.children?.length > 0) {
-						selectedFolder.value.children = selectedFolder?.value?.children?.filter((item, index, self) => index === self.findIndex((t) => t.id === item.id));
-						console.log("🚀 ~ callback ~ selectedFolder.value.children:", selectedFolder.value.children)
+					if (
+						selectedFolder?.value?.children &&
+						selectedFolder?.value?.children?.length > 0
+					) {
+						selectedFolder.value.children =
+							selectedFolder?.value?.children?.filter(
+								(item, index, self) =>
+									index ===
+									self.findIndex((t) => t.id === item.id)
+							);
+						console.log(
+							'🚀 ~ callback ~ selectedFolder.value.children:',
+							selectedFolder.value.children
+						);
 					}
 				}
 
-				const activeFolder = history?.value?.findIndex((curr: any) => curr?.id === selectedFolder.value?.id);
+				const activeFolder = history?.value?.findIndex(
+					(curr: any) => curr?.id === selectedFolder.value?.id
+				);
 
 				if (activeFolder !== -1) {
 					history.value[activeFolder].children.push(data);
@@ -462,7 +499,7 @@ const getDataFolders = () => {
 
 	const err = (e: any) => console.log(e);
 
-	getData({ entities: 'children.children' }, callback, err);
+	getData({ entities: 'children.children,children.parent' }, callback, err);
 };
 
 // Lifecycle Hooks

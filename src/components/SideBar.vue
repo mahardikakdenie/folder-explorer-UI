@@ -49,7 +49,7 @@
 							:key="childIndex">
 							<!-- Horizontal Connector Line -->
 							<div
-								@click="$emit('selected', item, child)"
+								@click="$emit('selected', child, true)"
 								class="flex items-center space-x-3 cursor-pointer rounded-lg p-2 hover:bg-slate-600 relative"
 								:class="{'bg-slate-600': history.some((curr: any) => curr?.id === child?.id)}">
 								<span
